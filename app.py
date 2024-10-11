@@ -312,3 +312,20 @@ def calc_():
 @app.route('/lab2/calc/<int:a>')
 def calc_one(b):
     return redirect(url_for('calc', a=a, b=1))
+
+books = [
+    {"author": "Джон Рональд Руэл Толкин", "title": "Хоббит", "genre": "Повесть", "pages": 256},
+    {"author": "Михаил Булгаков", "title": "Мастер и Маргарита", "genre": "Роман", "pages": 480},
+    {"author": "Джоан Роулинг", "title": "Гарри Поттер и философский камень", "genre": "Роман", "pages": 464},
+    {"author": "Лев Толстой", "title": "Война и мир", "genre": "Роман", "pages": 1225},
+    {"author": "Федор Достоевский", "title": "Преступление и наказание", "genre": "Роман", "pages": 671},
+    {"author": "Дж. Р. Р. Толкин", "title": "Властелин колец", "genre": "Фэнтези", "pages": 1137},
+    {"author": "Антуан де Сент-Экзюпери", "title": "Маленький принц", "genre": "Повесть-сказка", "pages": 112},
+    {"author": "Мигель де Сервантес", "title": "Дон Кихот", "genre": "Роман", "pages": 1152},
+    {"author": "Коллектив авторов", "title": "Библия", "genre": "Религиозная литература", "pages": 1520},
+    {"author": "Рей Брэдбери", "title": "451 градус по Фаренгейту", "genre": "Научная фантастика", "pages": 249}
+]
+
+@app.route('/lab2/books')
+def show_books():
+    return render_template('books.html', books=books)
