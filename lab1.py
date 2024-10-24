@@ -50,7 +50,7 @@ def oak():
     <link rel="stylesheet" type="text/css" href="''' + url_for('static', filename='lab1.css') + '''">
     <body>
         <h1>Дуб</h1>
-        <img src= "''' + url_for ('static', filename='oak.jpg') + '''" >
+        <img src= "''' + url_for ('static', filename='lab1/oak.jpg') + '''" >
     </body>
 </html>
 '''
@@ -76,7 +76,7 @@ def student():
         <p>Имя: Софья</p>
         <p>Отчество: Сергеевна</p>
 
-        <img src="''' + url_for('static', filename='nstu_logo.png') + '''" >
+        <img src="''' + url_for('static', filename='lab1/nstu_logo.png') + '''" >
 
         <footer>
             &copy; Софья Баранова, ФБИ-24, 3 курс, 2024
@@ -111,7 +111,7 @@ def python():
         Наличие активного сообщества разработчиков позволяет постоянно поддерживать и обновлять язык, 
         предоставлять достаточный объем обучающих материалов, документацию и форумы для программистов с любым уровнем знаний.</p>
 
-        <img src="''' + url_for('static', filename='python.jpeg') + '''" >
+        <img src="''' + url_for('static', filename='lab1/python.jpeg') + '''" >
 
         <footer>
             &copy; Софья Баранова, ФБИ-24, 3 курс, 2024
@@ -145,7 +145,7 @@ def cinnabon():
         Нашу корицу тщательно готовят с помощью специального процесса помола при определенной температуре, 
         это позволяет сохранить драгоценные эфирные масла и усилить сладкий аромат и вкус.</p>
 
-        <img src="''' + url_for('static', filename='cinnabon.png') + '''" >
+        <img src="''' + url_for('static', filename='lab1/cinnabon.png') + '''" >
 
         <footer>
             &copy; Софья Баранова, ФБИ-24, 3 курс, 2024

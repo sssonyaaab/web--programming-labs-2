@@ -21,15 +21,15 @@ flower_list = [ {"name": "Роза", "price": 100},
 @lab2.route('/lab2/flowers/<int:flower_id>')
 def flowers(flower_id):
     if flower_id >= len(flower_list):
-        return render_template('error.html', error_code=404, error_message="Такого цветка нет"), 404
+        return render_template('lab2/error.html', error_code=404, error_message="Такого цветка нет"), 404
     else:
         flower = flower_list[flower_id]
-        return render_template('flower.html', flower=flower, flower_id=flower_id)
+        return render_template('lab2/flower.html', flower=flower, flower_id=flower_id)
 
 
 @lab2.route('/lab2/flowers')
 def show_flowers():
-    return render_template('flowers.html', flowers=flower_list, total=len(flower_list))
+    return render_template('lab2/flowers.html', flowers=flower_list, total=len(flower_list))
 
 
 @lab2.route('/lab2/add_flower', methods=['POST'])
@@ -37,7 +37,7 @@ def add_flower():
     name = request.form.get('name')
     price = request.form.get('price')
     if not name or not price:
-        return render_template('error.html', error_code=400, error_message="Вы не задали имя или цену цветка"), 400
+        return render_template('lab2/error.html', error_code=400, error_message="Вы не задали имя или цену цветка"), 400
     
     flower_list.append({"name": name, "price": int(price)})
     return redirect(url_for('show_flowers'))
@@ -52,7 +52,7 @@ def clear_flowers():
 @lab2.route('/lab2/delete_flower/<int:flower_id>')
 def delete_flower(flower_id):
     if flower_id >= len(flower_list):
-        return render_template('error.html', error_code=404, error_message="Такого цветка нет"), 404
+        return render_template('lab2/error.html', error_code=404, error_message="Такого цветка нет"), 404
     else:
         flower_list.pop(flower_id)
         return redirect(url_for('show_flowers'))
@@ -71,19 +71,19 @@ def example():
         {'name': 'мандарины', 'price': 95}, 
         {'name': 'манго', 'price': 321}
     ]
-    return render_template('example.html', name=name, lab_num=lab_num, 
+    return render_template('lab2/example.html', name=name, lab_num=lab_num, 
                            group=group, kurs=kurs, fruits=fruits)
 
 
 @lab2.route('/lab2/')
 def lab():
-    return render_template('lab2.html')
+    return render_template('lab2/lab2.html')
 
 
 @lab2.route('/lab2/filters')
 def filters():
     phrase = "О <b>сколько</b> <u>нам</u> <i>открытий</i> чудных..."
-    return render_template('filter.html', phrase=phrase)
+    return render_template('lab2/filter.html', phrase=phrase)
 
 
 @lab2.route('/lab2/calc/<int:a>/<int:b>')
@@ -136,17 +136,17 @@ books = [
 
 @lab2.route('/lab2/books')
 def show_books():
-    return render_template('books.html', books=books)
+    return render_template('lab2/books.html', books=books)
 
 
 berries = [
-    {"name": "Клубника", "description": "Ягоды обладают ярко выраженным красным цветом.", "image": "strawberry.jpeg"},
-    {"name": "Малина", "description": "Плоды бывают красного, розового, желтого и черного цвета.", "image": "raspberry.webp"},
-    {"name": "Голубика", "description": "Синевато-черная ягода, которую путают с черникой.", "image": "blueberry.jpeg"},
-    {"name": "Ежевика", "description": "Сок плодов тёмно-красный, кислый со сладкими нотками.", "image": "blackberry.jpeg"},
-    {"name": "Вишня", "description": "Темно-красная ягода с насыщенным вкусом и ароматом.", "image": "cherry.jpeg"}
+    {"name": "Клубника", "description": "Ягоды обладают ярко выраженным красным цветом.", "image": "lab2/strawberry.jpeg"},
+    {"name": "Малина", "description": "Плоды бывают красного, розового, желтого и черного цвета.", "image": "lab2/raspberry.webp"},
+    {"name": "Голубика", "description": "Синевато-черная ягода, которую путают с черникой.", "image": "lab2/blueberry.jpeg"},
+    {"name": "Ежевика", "description": "Сок плодов тёмно-красный, кислый со сладкими нотками.", "image": "lab2/blackberry.jpeg"},
+    {"name": "Вишня", "description": "Темно-красная ягода с насыщенным вкусом и ароматом.", "image": "lab2/cherry.jpeg"}
 ]
 
 @lab2.route('/lab2/berries')
 def show_berries():
-    return render_template('berries.html', berries=berries)
+    return render_template('lab2/berries.html', berries=berries)
