@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block lab %} Лабораторная работа 3 {% endblock %}
+
+{% block main %}
+<h1>Заполните форму для покупки железнодорожного билета</h1>
+
+<form method="post" action="/lab3/ticket">
+    <label for="name">ФИО пассажира:</label>
+    <input type="text" id="name" name="name" value="{{ request.form.get('name', '') }}">
+    <div style="color: red;">{{ error_messages.get('name', '') }}</div><br>
+
+    <label>Полка:</label><br>
+    <input type="radio" id="lower" name="bunk" value="нижняя" {% if request.form.get('bunk') == 'нижняя' %}checked{% endif %}>
+    <label for="lower">Нижняя</label>
+    <input type="radio" id="upper" name="bunk" value="верхняя" {% if request.form.get('bunk') == 'верхняя' %}checked{% endif %}>
+    <label for="upper">Верхняя</label><br>
+    <div style="color: red;">{{ error_messages.get('bunk', '') }}</div>
+
+    <input type="checkbox" name="with_bed" {% if request.form.get('with_bed') %}checked{% endif %}> С постельным бельем<br>
+    <input type="checkbox" name="with_baggage" {% if request.form.get('with_baggage') %}checked{% endif %}> С багажом<br><br>
+
+    <label for="age">Возраст:</label>
+    <input type="number" id="age" name="age" min="1" max="120" value="{{ request.form.get('age', '') }}">
+    <div style="color: red;">{{ error_messages.get('age', '') }}</div><br>
+
+    <label for="departure">Пункт выезда:</label>
+    <input type="text" id="departure" name="departure" value="{{ request.form.get('departure', '') }}">
+    <div style="color: red;">{{ error_messages.get('departure', '') }}</div><br>
+
+    <label for="destination">Пункт назначения:</label>
+    <input type="text" id="destination" name="destination" value="{{ request.form.get('destination', '') }}">
+    <div style="color: red;">{{ error_messages.get('destination', '') }}</div><br>
+
+    <label for="travel_date">Дата поездки:</label>
+    <input type="date" id="travel_date" name="travel_date" value="{{ request.form.get('travel_date', '') }}">
+    <div style="color: red;">{{ error_messages.get('travel_date', '') }}</div><br>
+
+    <label><input type="checkbox" name="insurance" {% if request.form.get('insurance') %}checked{% endif %}> Нужна страховка</label><br><br>
+
+    <button type="submit">Купить билет</button>
+</form>
+{% endblock %}

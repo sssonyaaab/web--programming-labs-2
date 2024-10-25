@@ -97,3 +97,50 @@ def settings():
     font_style = request.cookies.get('font_style')
     resp = make_response(render_template('lab3/settings.html', color=color, background=background, font_size=font_size, font_style=font_style))
     return resp
+
+
+@lab3.route('/lab3/ticket', methods=['GET', 'POST'])
+def ticket():
+    error_messages = {}
+    if request.method == 'POST':
+        name = request.form.get('name')
+        bunk = request.form.get('bunk')
+        with_bed = request.form.get('with_bed') == 'on'
+        with_baggage = request.form.get('with_baggage') == 'on'
+        age = request.form.get('age')
+        departure = request.form.get('departure')
+        destination = request.form.get('destination')
+        travel_date = request.form.get('travel_date')
+        insurance = request.form.get('insurance') == 'on'
+        if not name:
+            error_messages['name'] = "Укажите ФИО."
+        if not bunk:
+            error_messages['bunk'] = "Выберите тип полки."
+        if not age or not age.isdigit() or not (1 <= int(age) <= 120):
+            error_messages['age'] = "Возраст должен быть от 1 до 120 лет."
+        if not departure:
+            error_messages['departure'] = "Укажите пункт выезда."
+        if not destination:
+            error_messages['destination'] = "Укажите пункт назначения."
+        if not travel_date:
+            error_messages['travel_date'] = "Укажите дату поездки."
+        if error_messages:
+            return render_template('lab3/ticket.html', error_messages=error_messages)
+        age = int(age)
+        is_child = age < 18
+        base_price = 700 if is_child else 1000
+        if bunk in ['нижняя', 'нижняя боковая']:
+            base_price += 100
+        if with_bed:
+            base_price += 75
+        if with_baggage:
+            base_price += 250
+        if insurance:
+            base_price += 150
+        return render_template('lab3/ticket_result.html', 
+                               name=name, age=age, is_child=is_child,
+                               departure=departure, destination=destination,
+                               travel_date=travel_date, bunk=bunk, 
+                               with_bed=with_bed, with_baggage=with_baggage,
+                               insurance=insurance, price=base_price)
+    return render_template('lab3/ticket.html', error_messages={})

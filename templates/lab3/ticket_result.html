@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block lab %} Лабораторная работа 3{% endblock %}
+
+{% block main %}
+<h1>Ваш билет</h1>
+
+<p>Пассажир: {{ name }}{% if is_child %} (Детский билет){% endif %}</p>
+<p>Возраст: {{ age }}</p>
+<p>Пункт выезда: {{ departure }}</p>
+<p>Пункт назначения: {{ destination }}</p>
+<p>Дата поездки: {{ travel_date }}</p>
+<p>Полка: {{ bunk }}</p>
+
+{% if with_bed %}
+    <p>С постельным бельем: Да</p>
+{% else %}
+    <p>С постельным бельем: Нет</p>
+{% endif %}
+
+{% if with_baggage %}
+    <p>С багажом: Да</p>
+{% else %}
+    <p>С багажом: Нет</p>
+{% endif %}
+
+{% if insurance %}
+    <p>Страховка: Включена</p>
+{% else %}
+    <p>Страховка: Не включена</p>
+{% endif %}
+
+<h2>Итоговая стоимость: {{ price }} руб.</h2>
+
+<a href="http://127.0.0.1:5000/lab3/ticket">Вернуться к форме заказа</a>
+{% endblock %}
