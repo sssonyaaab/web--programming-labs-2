@@ -154,3 +154,39 @@ def ticket():
                                with_bed=with_bed, with_baggage=with_baggage,
                                insurance=insurance, price=base_price)
     return render_template('lab3/ticket.html', error_messages={})
+
+
+products = [
+    {"name": "Телефон 1", "price": 15000, "brand": "Бренд 1", "color": "Black"},
+    {"name": "Телефон 2", "price": 18000, "brand": "Бренд 2", "color": "White"},
+    {"name": "Телефон 3", "price": 20000, "brand": "Бренд 3", "color": "Red"},
+    {"name": "Телефон 4", "price": 25000, "brand": "Бренд 4", "color": "Blue"},
+    {"name": "Телефон 5", "price": 22000, "brand": "Бренд 5", "color": "Black"},
+    {"name": "Телефон 6", "price": 30000, "brand": "Бренд 6", "color": "White"},
+    {"name": "Телефон 7", "price": 32000, "brand": "Бренд 7", "color": "Red"},
+    {"name": "Телефон 8", "price": 35000, "brand": "Бренд 8", "color": "Blue"},
+    {"name": "Телефон 9", "price": 40000, "brand": "Бренд 9", "color": "Black"},
+    {"name": "Телефон 10", "price": 45000, "brand": "Бренд 10", "color": "White"},
+    {"name": "Телефон 11", "price": 50000, "brand": "Бренд 11", "color": "Red"},
+    {"name": "Телефон 12", "price": 55000, "brand": "Бренд 12", "color": "Blue"},
+    {"name": "Телефон 13", "price": 60000, "brand": "Бренд 13", "color": "Black"},
+    {"name": "Телефон 14", "price": 65000, "brand": "Бренд 14", "color": "White"},
+    {"name": "Телефон 15", "price": 70000, "brand": "Бренд 15", "color": "Red"},
+    {"name": "Телефон 16", "price": 75000, "brand": "Бренд 16", "color": "Blue"},
+    {"name": "Телефон 17", "price": 80000, "brand": "Бренд 17", "color": "Black"},
+    {"name": "Телефон 18", "price": 85000, "brand": "Бренд 18", "color": "White"},
+    {"name": "Телефон 19", "price": 90000, "brand": "Бренд 19", "color": "Red"},
+    {"name": "Телефон 20", "price": 95000, "brand": "Бренд 20", "color": "Blue"},
+]
+
+@lab3.route('/lab3/products', methods=['GET', 'POST'])
+def product_search():
+    filtered_products = []
+    if request.method == 'POST':
+        min_price = request.form.get('min_price', type=int, default=0)
+        max_price = request.form.get('max_price', type=int, default=float('inf'))
+        filtered_products = [
+            product for product in products
+            if min_price <= product['price'] <= max_price
+        ]
+    return render_template('lab3/product.html', products=filtered_products)
