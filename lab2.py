@@ -40,13 +40,13 @@ def add_flower():
         return render_template('lab2/error.html', error_code=400, error_message="Вы не задали имя или цену цветка"), 400
     
     flower_list.append({"name": name, "price": int(price)})
-    return redirect(url_for('show_flowers'))
+    return redirect(url_for('lab2.show_flowers'))
 
 
 @lab2.route('/lab2/clear_flowers')
 def clear_flowers():
     flower_list.clear()
-    return redirect(url_for('show_flowers'))
+    return redirect(url_for('lab2.show_flowers'))
 
 
 @lab2.route('/lab2/delete_flower/<int:flower_id>')
@@ -55,7 +55,7 @@ def delete_flower(flower_id):
         return render_template('lab2/error.html', error_code=404, error_message="Такого цветка нет"), 404
     else:
         flower_list.pop(flower_id)
-        return redirect(url_for('show_flowers'))
+        return redirect(url_for('lab2.show_flowers'))
 
 
 @lab2.route('/lab2/example')
