@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, session
+from flask import Blueprint, render_template, request, redirect, session, url_for
 lab4 = Blueprint('lab4', __name__)
 
 
@@ -158,6 +158,51 @@ def login():
 def logout():
     session.pop('login', None)
     return redirect('/lab4/login')
+
+
+@lab4.route('/lab4/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        login = request.form.get('login')
+        password = request.form.get('password')
+        name = request.form.get('name')
+        gender = request.form.get('gender')
+        if not login or not password or not name:
+            error = "Все поля обязательны для заполнения"
+            return render_template('lab4/register.html', error=error)
+        for user in users:
+            if user['login'] == login:
+                error = "Пользователь с таким логином уже существует"
+                return render_template('lab4/register.html', error=error)
+        users.append({'login': login, 'password': password, 'name': name, 'gender': gender})
+        return redirect(url_for('lab4.login'))
+    return render_template('lab4/register.html')
+
+
+@lab4.route('/lab4/users', methods=['GET', 'POST'])
+def user():
+    if 'login' not in session:
+        return redirect(url_for('lab4.login'))
+    current_login = session['login']
+    if request.method == 'POST':
+        if request.form.get('action') == 'edit':
+            new_name = request.form.get('name')
+            new_password = request.form.get('password')
+            for user in users:
+                if user['login'] == current_login:
+                    if new_name:
+                        user['name'] = new_name
+                        session['name'] = new_name
+                    if new_password:
+                        user['password'] = new_password
+                    break
+            return redirect(url_for('lab4.user'))
+        elif request.form.get('action') == 'delete':
+            users[:] = [user for user in users if user['login'] != current_login]
+            session.pop('login', None)
+            session.pop('name', None)
+            return redirect(url_for('lab4.login'))
+    return render_template('lab4/user.html', users=users, current_login=current_login, current_user_name=session.get('name'))
 
 
 @lab4.route('/lab4/fridge', methods=['GET', 'POST'])

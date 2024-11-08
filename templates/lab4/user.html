@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block main %}
+    <h1>Список пользователей</h1>
+    <ul>
+        {% for user in users %}
+            <li>
+                Логин: {{ user.login }}, Имя: {{ user.name }}
+                {% if user.login == current_login %}
+                    <form method="post" style="display:inline;">
+                        <button type="submit" name="action" value="delete">Удалить себя</button>
+                    </form>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+    <h2>Редактирование данных</h2>
+    <form method="post">
+        <label>Имя:</label>
+        <input type="text" name="name" value="{{ current_user_name }}"><br>
+        <label>Новый пароль:</label>
+        <input type="password" name="password"><br>
+        <button type="submit" name="action" value="edit">Сохранить изменения</button>
+    </form>
+{% endblock %}
