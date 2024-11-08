@@ -114,10 +114,10 @@ def tree():
 
 
 users = [
-    {'login': 'alex', 'password': '123'},
-    {'login': 'bob', 'password': '555'},
-    {'login': 'vadim', 'password': '666'},
-    {'login': 'ignat', 'password': '444'},
+    {'login': 'alex', 'password': '123', 'name': 'Александр Финин', 'gender': 'male'},
+    {'login': 'bob', 'password': '555', 'name': 'Боб Краснов', 'gender': 'male'},
+    {'login': 'vadim', 'password': '666', 'name': 'Вадим Логинов', 'gender': 'male'},
+    {'login': 'ignat', 'password': '444', 'name': 'Игнат Мартыненко', 'gender': 'male'},
 ]
 
 
@@ -127,21 +127,31 @@ def login():
         if 'login' in session:
             authorized = True
             login = session['login']
+            name = session['name']
         else:
             authorized = False
             login = ''
-        return render_template('lab4/login.html', authorized=authorized, login=login)
+            name = ''
+        return render_template('lab4/login.html', authorized=authorized, login=login, name=name)
     
     login = request.form.get('login')
     password = request.form.get('password')
 
+    if not login:
+        error = 'Не введён логин'
+        return render_template('lab4/login.html', error=error, authorized=False, login=login)
+    if not password:
+        error = 'Не введён пароль'
+        return render_template('lab4/login.html', error=error, authorized=False, login=login)
+
     for user in users:
         if login == user['login'] and password == user['password']:
             session['login'] = login
+            session['name'] = user['name']
             return redirect('/lab4/login')
     
     error = 'Неверные логин и/или пароль'
-    return render_template('lab4/login.html', error=error, authorized=False)
+    return render_template('lab4/login.html', error=error, authorized=False, login=login)
 
 
 @lab4.route('/lab4/logout', methods=['POST'])
