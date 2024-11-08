@@ -190,3 +190,40 @@ def fridge():
                 error = "Ошибка: температура должна быть числом"
 
     return render_template('lab4/fridge.html', error=error, message=message, snowflakes=snowflakes)
+
+
+prices = {
+    'ячмень': 12345,
+    'овёс': 8522,
+    'пшеница': 8722,
+    'рожь': 14111
+}
+
+@lab4.route('/lab4/order', methods=['GET', 'POST'])
+def order():
+    error = None
+    message = None
+    discount = None
+    if request.method == 'POST':
+        grain_type = request.form.get('grain_type')
+        weight = request.form.get('weight')
+        if not weight:
+            error = "Ошибка: вес не указан"
+        else:
+            try:
+                weight = float(weight)
+                if weight <= 0:
+                    error = "Ошибка: вес должен быть больше 0"
+                elif weight > 500:
+                    error = "Такого объёма сейчас нет в наличии"
+                else:
+                    price = prices.get(grain_type)
+                    total_price = weight * price
+                    if weight > 50:
+                        discount = 0.10
+                        total_price *= (1 - discount)
+                    message = (f"Заказ успешно сформирован. Вы заказали {grain_type}. "
+                                f"Вес: {weight} т. Сумма к оплате: {total_price:.2f} руб")
+            except ValueError:
+                error = "Ошибка: вес должен быть числом"
+    return render_template('lab4/order.html', error=error, message=message, discount=discount)

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block lab %}Заказ зерна{% endblock %}
+
+{% block main %}
+    <h1>Заказ зерна</h1>
+    <div> 
+        <h3>Цены на зерно:</h3> 
+        <ul> 
+            <li>Ячмень: 12 345 руб/т</li> 
+            <li>Овёс: 8 522 руб/т</li> 
+            <li>Пшеница: 8 722 руб/т</li> 
+            <li>Рожь: 14 111 руб/т</li> 
+        </ul> 
+    </div>
+    <form method="post">
+        <div>
+            <label for="grain_type">Выберите вид зерна:</label>
+            <select id="grain_type" name="grain_type" required>
+                <option value="ячмень">Ячмень</option>
+                <option value="овёс">Овёс</option>
+                <option value="пшеница">Пшеница</option>
+                <option value="рожь">Рожь</option>
+            </select>
+        </div>
+        <div>
+            <label for="weight">Вес (т):</label>
+            <input type="text" id="weight" name="weight">
+        </div>
+        <div>
+            <button type="submit">Сформировать заказ</button>
+        </div>
+    </form>
+    {% if error %}
+        <div style="color: red; font-weight: bold; margin-top: 10px;">
+            {{ error }}
+        </div>
+    {% elif message %}
+        <div style="color: green; font-weight: bold; margin-top: 10px;">
+            {{ message }}
+        </div>
+        {% if discount %}
+            <div style="color: blue; font-style: italic; margin-top: 5px;">
+                Применена скидка за большой объём: {{ discount * 100 }}%
+            </div>
+        {% endif %}
+    {% endif %}
+{% endblock %}
