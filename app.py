@@ -3,6 +3,7 @@ from lab1 import lab1
 from lab2 import lab2
 from lab3 import lab3
 from lab4 import lab4
+from lab5 import lab5
 
 app = Flask(__name__)
 
@@ -12,6 +13,7 @@ app.register_blueprint(lab1)
 app.register_blueprint(lab2)
 app.register_blueprint(lab3)
 app.register_blueprint(lab4)
+app.register_blueprint(lab5)
 
 @app.route("/")
 
@@ -38,6 +40,7 @@ def menu():
         <p><a href="http://127.0.0.1:5000/lab2/">Вторая лабораторная</a></p>
         <p><a href="http://127.0.0.1:5000/lab3/">Третья лабораторная</a></p>
         <p><a href="http://127.0.0.1:5000/lab4/">Четвертая лабораторная</a></p>
+        <p><a href="http://127.0.0.1:5000/lab5/">Пятая лабораторная</a></p>
 
         <footer>
             &copy; Софья Баранова, ФБИ-24, 3 курс, 2024
