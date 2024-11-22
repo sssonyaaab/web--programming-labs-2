@@ -119,9 +119,17 @@ def list():
     user_id = cur.fetchone()["id"]
 
     if current_app.config['DB_TYPE'] == 'postgres':
-        cur.execute("SELECT * FROM articles WHERE user_id=%s;", (user_id,))
+        cur.execute("""
+            SELECT * FROM articles 
+            WHERE user_id=%s 
+            ORDER BY is_favorite DESC, is_public DESC, id ASC;
+        """, (user_id,))
     else:
-        cur.execute("SELECT * FROM articles WHERE user_id=?;", (user_id,))
+        cur.execute("""
+            SELECT * FROM articles 
+            WHERE user_id=? 
+            ORDER BY is_favorite DESC, is_public DESC, id ASC;
+        """, (user_id,))
     articles = cur.fetchall()
 
     db_close(conn, cur)
@@ -139,6 +147,8 @@ def create():
     
     title = request.form.get('title')
     article_text = request.form.get('article_text')
+    is_public = request.form.get('is_public') == '1'
+    is_favorite = request.form.get('is_favorite') == '1'
 
     if not title or not article_text:
         return render_template('lab5/create_article.html', error='Заполните все поля')
@@ -152,11 +162,11 @@ def create():
     user_id = cur.fetchone()["id"]
 
     if current_app.config['DB_TYPE'] == 'postgres':
-        cur.execute("INSERT INTO articles(user_id, title, article_text) \
-                    VALUES (%s, %s, %s);", (user_id, title, article_text))
+        cur.execute("INSERT INTO articles(user_id, title, article_text, is_public, is_favorite) \
+                    VALUES (%s, %s, %s, %s, %s);", (user_id, title, article_text, is_public, is_favorite))
     else:
-        cur.execute("INSERT INTO articles(user_id, title, article_text) \
-                    VALUES (?, ?, ?);", (user_id, title, article_text))
+        cur.execute("INSERT INTO articles(user_id, title, article_text, is_public, is_favorite) \
+                    VALUES (?, ?, ?, ?, ?);", (user_id, title, article_text, is_public, is_favorite))
     
     db_close(conn, cur)
     return redirect('/lab5')
@@ -233,3 +243,65 @@ def delete_article():
     
     db_close(conn, cur)
     return redirect('/lab5/list')
+
+
+@lab5.route('/lab5/users')
+def users():
+    conn, cur = db_connect()
+
+    cur.execute("SELECT login FROM users;")
+
+    users = cur.fetchall()
+    db_close(conn, cur)
+
+    return render_template('lab5/users.html', users=users)
+
+
+@lab5.route('/lab5/favorite', methods=['POST'])
+def favorite():
+    login = session.get('login')
+    if not login:
+        return redirect('/lab5/login')
+    
+    article_id = request.form.get('article_id')
+    is_favorite = request.form.get('is_favorite') == '1'
+
+    conn, cur = db_connect()
+
+    if current_app.config['DB_TYPE'] == 'postgres':
+        cur.execute("SELECT id FROM users WHERE login=%s;", (login,))
+    else:
+        cur.execute("SELECT id FROM users WHERE login=?;", (login,))
+    user_id = cur.fetchone()["id"]
+
+    if current_app.config['DB_TYPE'] == 'postgres':
+        cur.execute("SELECT id FROM articles WHERE id=%s AND user_id=%s;", (article_id, user_id))
+    else:
+        cur.execute("SELECT id FROM articles WHERE id=? AND user_id=?;", (article_id, user_id))
+    article = cur.fetchone()
+
+    if not article:
+        db_close(conn, cur)
+        return redirect('/lab5/list')
+
+    if current_app.config['DB_TYPE'] == 'postgres':
+        cur.execute("UPDATE articles SET is_favorite=%s WHERE id=%s AND user_id=%s;", (is_favorite, article_id, user_id))
+    else:
+        cur.execute("UPDATE articles SET is_favorite=? WHERE id=? AND user_id=?;", (is_favorite, article_id, user_id))
+    
+    db_close(conn, cur)
+    return redirect('/lab5/list')
+
+
+@lab5.route('/lab5/public')
+def public_articles():
+    conn, cur = db_connect()
+
+    if current_app.config['DB_TYPE'] == 'postgres':
+        cur.execute("SELECT * FROM articles WHERE is_public=True ORDER BY is_favorite DESC, id ASC;")
+    else:
+        cur.execute("SELECT * FROM articles WHERE is_public=1 ORDER BY is_favorite DESC, id ASC;")
+
+    public_articles = cur.fetchall()
+    db_close(conn, cur)
+    return render_template('/lab5/public_articles.html', articles=public_articles)

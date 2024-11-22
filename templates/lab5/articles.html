@@ -6,10 +6,23 @@
 
     <h1>Статьи</h1>
     
+    <a href="/lab5/public">Посмотреть публичные статьи</a>
+
     {% if articles %}
         {% for article in articles %}
             <h2>{{ article['title'] }}</h2>
             <blockquote>{{ article ['article_text'] }}</blockquote>
+            <form action="/lab5/favorite" method="post" style="display:inline;">
+                <input type="hidden" name="article_id" value="{{ article['id'] }}">
+                <input type="hidden" name="is_favorite" value="{{ '1' if not article['is_favorite'] else '0' }}">
+                <button type="submit">
+                    {% if article['is_favorite'] %}
+                        Убрать из избранного
+                    {% else %}
+                        Добавить в избранное
+                    {% endif %}
+                </button>
+            </form>
             <a href="/lab5/edit?article_id={{ article['id'] }}">Редактировать</a>
             <form action="/lab5/delete" method="post" style="display:inline;">
                 <input type="hidden" name="article_id" value="{{ article['id'] }}">
