@@ -32,6 +32,11 @@ function getOfficeList() {
             bookingButton.onclick = function() {booking(office.number)};
             li.appendChild(bookingButton);
 
+            const releaseButton = document.createElement('button');
+            releaseButton.innerText = 'освободить';
+            releaseButton.onclick = function() {release(office.number)};
+            li.appendChild(releaseButton);
+
             ul.appendChild(li);
         }
     });
