@@ -89,6 +89,6 @@ def put_film(id):
 def add_film():
     new_film = request.get_json()
     if not new_film or 'title' not in new_film or 'title_ru' not in new_film or 'year' not in new_film or 'description' not in new_film:
-        return 'Некорректные данные фильма', 404
+        return 'Некорректные данные фильма', 400
     films.append(new_film)
-    return {'id': len(films) - 1}, 204
+    return {'id': len(films) - 1}
