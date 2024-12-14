@@ -1,6 +1,29 @@
-from flask import Blueprint, render_template, request, jsonify
+from flask import Blueprint, render_template, request, jsonify, current_app
+import psycopg2
+from psycopg2.extras import RealDictCursor
+from werkzeug.security import check_password_hash, generate_password_hash
+import sqlite3
+from os import path
 
 lab7 = Blueprint('lab7', __name__)
+
+def db_connect():
+    if current_app.config['DB_TYPE'] == 'postgres':
+        conn = psycopg2.connect(
+            host='127.0.0.1',
+            database='sonya_baranova_knowledge_base',
+            user='sonya_baranova_knowledge_base',
+            password='123'
+        )
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+    else:
+        dir_path = path.dirname(path.realpath(__file__))
+        db_path = path.join(dir_path, "database.db")
+        conn = sqlite3.connect(db_path)
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+
+    return conn, cur
 
 
 @lab7.route('/lab7/')
@@ -8,7 +31,7 @@ def main():
     return render_template('lab7/index.html')
 
 
-films = [
+#films = [
     {
         "title": "Intouchables",
         "title_ru": "1+1",
@@ -53,50 +76,88 @@ films = [
         "year": 2009,
         "description": "Два американских судебных пристава отправляются на один из островов в штате Массачусетс, чтобы расследовать исчезновение пациентки клиники для умалишенных преступников. При проведении расследования им придется столкнуться с паутиной лжи, обрушившимся ураганом и смертельным бунтом обитателей клиники."
     },
-]
+#]
 
 @lab7.route('/lab7/rest-api/films/', methods=['GET'])
 def get_films():
+    conn, cur = db_connect()
+    cur.execute("SELECT * FROM films")
+    films = cur.fetchall()
+    conn.close()
     return jsonify(films)
 
 
 @lab7.route('/lab7/rest-api/films/<int:id>', methods=['GET'])
 def get_film(id):
-    if id < 0 or id >= len(films):
+    conn, cur = db_connect()
+    cur.execute("SELECT * FROM films WHERE id = %s", (id,))
+    film = cur.fetchone()
+    conn.close()
+    if not film:
         return 'Номер выходит за пределы значений', 404
-    return films[id]
+    return jsonify(film)
 
 @lab7.route('/lab7/rest-api/films/<int:id>', methods=['DELETE'])
 def del_film(id):
-    if id < 0 or id >= len(films):
-        return 'Номер выходит за пределы значений', 404
-    del films[id]
+    conn, cur = db_connect()
+    cur.execute("DELETE FROM films WHERE id = %s", (id,))
+    conn.commit()
+    conn.close()
     return '', 204
 
 
 @lab7.route('/lab7/rest-api/films/<int:id>', methods=['PUT'])
 def put_film(id):
-    if id < 0 or id >= len(films):
-        return 'Номер выходит за пределы значений', 404
     film = request.get_json()
-    if not film or 'title_ru' not in film or 'year' not in film:
-        return 'Некорректные данные фильма', 400
-    if film['description'] == '':
-        return {'description': 'Заполните описание'}, 400
-    if 'title' not in film or film['title'] == '':
+    if not film['title_ru']:
+        return {'title_ru': 'Русское название не может быть пустым'}, 400
+    if 'title' not in film or not film['title']:
+        if not film['title_ru']:
+            return {'title': 'Название на оригинальном языке не может быть пустым, если русское название пустое'}, 400
         film['title'] = film['title_ru']
-    films[id] = film
-    return films[id]
+    year_int = int(film['year'])
+    now_year = 2024
+    if not (1895 <= year_int <= now_year):
+        return {'year': f'Год должен быть от 1895 до {now_year}'}, 400
+    if not film['description']:
+        return {'description': 'Описание не может быть пустым'}, 400
+    if len(film['description']) > 2000:
+        return {'description': 'Описание не может быть длиннее 2000 символов'}, 400
+    conn, cur = db_connect()
+    cur.execute("""
+        UPDATE films
+        SET title = %s, title_ru = %s, year = %s, description = %s
+        WHERE id = %s
+    """, (film['title'], film['title_ru'], film['year'], film['description'], id))
+    conn.commit()
+    conn.close()
+    return '', 204
 
 
 @lab7.route('/lab7/rest-api/films/', methods=['POST'])
 def add_film():
     new_film = request.get_json()
-    if not new_film or 'title_ru' not in new_film or 'year' not in new_film:
-        return 'Некорректные данные фильма', 400
-    if new_film['description'] == '':
-        return {'description': 'Заполните описание'}, 400
-    if 'title' not in new_film or new_film['title'] == '':
+    if not new_film['title_ru']:
+        return {'title_ru': 'Русское название не может быть пустым'}, 400
+    if 'title' not in new_film or not new_film['title']:
+        if not new_film['title_ru']:
+            return {'title': 'Название на оригинальном языке не может быть пустым, если русское название пустое'}, 400
         new_film['title'] = new_film['title_ru']
-    films.append(new_film)
-    return {'id': len(films) - 1}
+    year_int = int(new_film['year'])
+    now_year = 2024
+    if not (1895 <= year_int <= now_year):
+        return {'year': f'Год должен быть от 1895 до {now_year}'}, 400
+    if not new_film['description']:
+        return {'description': 'Описание не может быть пустым'}, 400
+    if len(new_film['description']) > 2000:
+        return {'description': 'Описание не может быть длиннее 2000 символов'}, 400
+    conn, cur = db_connect()
+    cur.execute("""
+        INSERT INTO films (title, title_ru, year, description)
+        VALUES (%s, %s, %s, %s)
+        RETURNING id
+    """, (new_film['title'], new_film['title_ru'], new_film['year'], new_film['description']))
+    new_id = cur.fetchone()['id']
+    conn.commit()
+    conn.close()
+    return {'id': new_id}, 201
