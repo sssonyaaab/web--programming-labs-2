@@ -79,10 +79,12 @@ def put_film(id):
     if id < 0 or id >= len(films):
         return 'Номер выходит за пределы значений', 404
     film = request.get_json()
-    if not film or 'title' not in film or 'title_ru' not in film or 'year' not in film:
+    if not film or 'title_ru' not in film or 'year' not in film:
         return 'Некорректные данные фильма', 400
     if film['description'] == '':
         return {'description': 'Заполните описание'}, 400
+    if 'title' not in film or film['title'] == '':
+        film['title'] = film['title_ru']
     films[id] = film
     return films[id]
 
@@ -90,9 +92,11 @@ def put_film(id):
 @lab7.route('/lab7/rest-api/films/', methods=['POST'])
 def add_film():
     new_film = request.get_json()
-    if not new_film or 'title' not in new_film or 'title_ru' not in new_film or 'year' not in new_film:
+    if not new_film or 'title_ru' not in new_film or 'year' not in new_film:
         return 'Некорректные данные фильма', 400
     if new_film['description'] == '':
         return {'description': 'Заполните описание'}, 400
+    if 'title' not in new_film or new_film['title'] == '':
+        new_film['title'] = new_film['title_ru']
     films.append(new_film)
     return {'id': len(films) - 1}
