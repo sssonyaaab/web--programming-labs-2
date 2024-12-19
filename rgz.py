@@ -92,7 +92,7 @@ def login():
 
             if user and check_password_hash(user['password'], password):
                 session['user_id'] = user['id']
-                return redirect(url_for('rgz.profile'), user=user)
+                return render_template('rgz/profile.html', user=user)
             else:
                 message = "Неверный логин или пароль."
         except Exception as e:
