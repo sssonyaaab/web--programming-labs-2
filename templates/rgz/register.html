@@ -1,0 +1,17 @@
+{% extends 'rgz.html' %}
+
+{% block main %}
+<h2>Регистрация</h2>
+{% if error %}
+    <p style="color: red;">{{ error }}</p>
+{% endif %}
+<form method="POST">
+    <label for="login">Логин:</label>
+    <input type="text" id="login" name="login" required>
+    <label for="password">Пароль:</label>
+    <input type="password" id="password" name="password" required>
+    <label for="confirm_password">Подтвердите пароль:</label>
+    <input type="password" id="confirm_password" name="confirm_password" required>
+    <button type="submit">Зарегистрироваться</button>
+</form>
+{% endblock %}

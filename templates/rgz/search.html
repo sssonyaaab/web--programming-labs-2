@@ -1,0 +1,29 @@
+{% extends 'rgz.html' %}
+
+{% block main %}
+<h1>Результаты поиска</h1>
+
+<div class="pagination">
+    {% if page > 1 %}
+        <a href="{{ url_for('rgz.search', page=page-1) }}">Предыдущая</a>
+    {% endif %}
+    {% if page < total_pages %}
+        <a href="{{ url_for('rgz.search', page=page+1) }}">Следующая</a>
+    {% endif %}
+</div>
+
+{% if users %}
+    <ul>
+        {% for user in users %}
+            <li>
+                <strong>{{ user.name }}</strong> , {{ user.age }} лет<br>
+                Пол: {{ user.gender }}<br>
+                О себе: {{ user.about }}<br>
+                <img src="{{ user.photo }}" alt="Фото {{ user.name }}" style="max-width: 100px;">
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>По вашему запросу ничего не найдено.</p>
+{% endif %}
+{% endblock %}

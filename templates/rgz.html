@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Сайт знакомств{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='rgz.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='favicon 2.ico') }}" type="image/x-icon">
+</head>
+<body>
+    <header>
+        <h1>RGZ</h1>
+        <h2>romantic go zest</h2>
+        <nav>
+            <a href="/rgz">Главная</a></li>
+            {% if session.get('user_id') %}
+                <a href="/profile">Профиль</a>
+                <a href="/search">Поиск</a>
+                <a href="/logout">Выйти</a>
+            {% else %}
+                <a href="/login">Войти</a>
+                <a href="/register">Регистрация</a>
+            {% endif %}
+        </nav>
+    </header>
+    <main>
+        {% block main %}{% endblock %}
+    </main>
+    <footer>
+        &copy; Соня Баранова, ФБИ-24, 3 курс, 2024
+    </footer>
+</body>
+</html>
