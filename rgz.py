@@ -88,15 +88,16 @@ def login():
             else:
                 cur.execute("SELECT * FROM users WHERE login = ?", (login,))
             user = cur.fetchone()
-            conn.close()
 
             if user and check_password_hash(user['password'], password):
                 session['user_id'] = user['id']
-                return render_template('rgz/profile.html', user=user)
+                return redirect(url_for('rgz.profile'))
             else:
                 message = "Неверный логин или пароль."
         except Exception as e:
             message = f"Ошибка авторизации: {e}"
+        finally:
+            conn.close()
 
     return render_template('rgz/login.html', message=message)
 
