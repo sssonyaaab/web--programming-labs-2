@@ -77,6 +77,10 @@ def login():
         login = request.form['login']
         password = request.form['password']
 
+        if not login or not password:
+            message = "Пожалуйста, заполните все поля."
+            return render_template('rgz/login.html', message=message)
+
         try:
             conn, cur = db_connect()
             if current_app.config['DB_TYPE'] == 'postgres':

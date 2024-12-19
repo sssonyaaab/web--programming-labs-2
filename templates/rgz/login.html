@@ -12,4 +12,6 @@
     <input type="password" id="password" name="password" required>
     <button type="submit">Войти</button>
 </form>
+{% if message %}
+    <p>{{ message }}</p>
 {% endblock %}
