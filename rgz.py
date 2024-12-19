@@ -7,7 +7,6 @@ from os import path
 
 rgz = Blueprint('rgz', __name__)
 
-# Функция для подключения к базе данных
 def db_connect():
     if current_app.config['DB_TYPE'] == 'postgres':
         conn = psycopg2.connect(
@@ -26,7 +25,6 @@ def db_connect():
 
     return conn, cur
 
-# Валидация логина и пароля
 def validate_login(login, password):
     if not login:
         return False, "Логин не может быть пустым."
@@ -42,12 +40,10 @@ def validate_login(login, password):
 
     return True, ""
 
-# Маршрут для главной страницы
 @rgz.route('/rgz')
 def home():
     return render_template('rgz/home.html')
 
-# Регистрация
 @rgz.route('/register', methods=['GET', 'POST'])
 def register():
     message = None
@@ -61,7 +57,10 @@ def register():
             hashed_password = generate_password_hash(password)
             try:
                 conn, cur = db_connect()
-                cur.execute("INSERT INTO users (login, password) VALUES (%s, %s)", (login, hashed_password))
+                if current_app.config['DB_TYPE'] == 'postgres':
+                    cur.execute("INSERT INTO users (login, password) VALUES (%s, %s)", (login, hashed_password))
+                else:
+                    cur.execute("INSERT INTO users (login, password) VALUES (?, ?)", (login, hashed_password))
                 conn.commit()
                 conn.close()
                 return redirect(url_for('rgz.login'))
@@ -71,7 +70,6 @@ def register():
 
     return render_template('rgz/register.html', message=message)
 
-# Авторизация
 @rgz.route('/login', methods=['GET', 'POST'])
 def login():
     message = None
@@ -81,7 +79,10 @@ def login():
 
         try:
             conn, cur = db_connect()
-            cur.execute("SELECT * FROM users WHERE login = %s", (login,))
+            if current_app.config['DB_TYPE'] == 'postgres':
+                cur.execute("SELECT * FROM users WHERE login = %s", (login,))
+            else:
+                cur.execute("SELECT * FROM users WHERE login = ?", (login,))
             user = cur.fetchone()
             conn.close()
 
@@ -95,7 +96,6 @@ def login():
 
     return render_template('rgz/login.html', message=message)
 
-# Профиль
 @rgz.route('/profile', methods=['GET', 'POST'])
 def profile():
     if 'user_id' not in session:
@@ -104,7 +104,10 @@ def profile():
     message = None
     try:
         conn, cur = db_connect()
-        cur.execute("SELECT * FROM users WHERE id = %s", (session['user_id'],))
+        if current_app.config['DB_TYPE'] == 'postgres':
+            cur.execute("SELECT * FROM users WHERE id = %s", (session['user_id'],))
+        else:
+            cur.execute("SELECT * FROM users WHERE id = ?", (session['user_id'],))
         user = cur.fetchone()
 
         if request.method == 'POST':
@@ -115,14 +118,24 @@ def profile():
             about = request.form.get('about', user['about'])
             photo = request.form.get('photo', user['photo'])
 
-            cur.execute("""
-                UPDATE users
-                SET name = %s, age = %s, gender = %s, search_gender = %s, about = %s, photo = %s
-                WHERE id = %s
-            """, (name, age, gender, search_gender, about, photo, session['user_id']))
+            if current_app.config['DB_TYPE'] == 'postgres':
+                cur.execute("""
+                    UPDATE users
+                    SET name = %s, age = %s, gender = %s, search_gender = %s, about = %s, photo = %s
+                    WHERE id = %s
+                """, (name, age, gender, search_gender, about, photo, session['user_id']))
+            else:
+                cur.execute("""
+                    UPDATE users
+                    SET name = ?, age = ?, gender = ?, search_gender = ?, about = ?, photo = ?
+                    WHERE id = ?
+                """, (name, age, gender, search_gender, about, photo, session['user_id']))
             conn.commit()
 
-            cur.execute("SELECT * FROM users WHERE id = %s", (session['user_id'],))
+            if current_app.config['DB_TYPE'] == 'postgres':
+                cur.execute("SELECT * FROM users WHERE id = %s", (session['user_id'],))
+            else:
+                cur.execute("SELECT * FROM users WHERE id = ?", (session['user_id'],))
             user = cur.fetchone()
 
             message = "Профиль обновлен!"
@@ -135,7 +148,6 @@ def profile():
 
     return render_template('rgz/profile.html', message=message)
 
-# Скрыть профиль
 @rgz.route('/hide_profile', methods=['POST'])
 def hide_profile():
     if 'user_id' not in session:
@@ -144,7 +156,10 @@ def hide_profile():
     message = None
     try:
         conn, cur = db_connect()
-        cur.execute("UPDATE users SET hidden = TRUE WHERE id = %s", (session['user_id'],))
+        if current_app.config['DB_TYPE'] == 'postgres':
+            cur.execute("UPDATE users SET hidden = TRUE WHERE id = %s", (session['user_id'],))
+        else:
+            cur.execute("UPDATE users SET hidden = TRUE WHERE id = ?", (session['user_id'],))
         conn.commit()
         message = "Ваш профиль скрыт."
     except Exception as e:
@@ -154,7 +169,6 @@ def hide_profile():
 
     return redirect(url_for('rgz.profile', message=message))
 
-# Удалить аккаунт
 @rgz.route('/delete_account', methods=['POST'])
 def delete_account():
     if 'user_id' not in session:
@@ -162,7 +176,10 @@ def delete_account():
 
     try:
         conn, cur = db_connect()
-        cur.execute("DELETE FROM users WHERE id = %s", (session['user_id'],))
+        if current_app.config['DB_TYPE'] == 'postgres':
+            cur.execute("DELETE FROM users WHERE id = %s", (session['user_id'],))
+        else:
+            cur.execute("DELETE FROM users WHERE id = ?", (session['user_id'],))
         conn.commit()
         conn.close()
         session.pop('user_id', None)
@@ -172,7 +189,6 @@ def delete_account():
         conn.close()
         return render_template('rgz/profile.html', message=message)
 
-# Поиск
 @rgz.route('/search', methods=['GET'])
 def search():
     if 'user_id' not in session:
@@ -181,31 +197,43 @@ def search():
     message = None
     try:
         conn, cur = db_connect()
-        cur.execute("SELECT * FROM users WHERE id = %s", (session['user_id'],))
+        if current_app.config['DB_TYPE'] == 'postgres':
+            cur.execute("SELECT * FROM users WHERE id = %s", (session['user_id'],))
+        else:
+            cur.execute("SELECT * FROM users WHERE id = ?", (session['user_id'],))
         current_user = cur.fetchone()
 
-        # Получаем пол и предпочтения текущего пользователя
         current_gender = current_user['gender']
         current_search_gender = current_user['search_gender']
 
-        # Параметры пагинации
         page = request.args.get('page', 1, type=int)
         per_page = 3
         offset = (page - 1) * per_page
 
-        # Запрос к базе данных
-        cur.execute("""
-            SELECT * FROM users
-            WHERE gender = %s AND search_gender = %s AND id != %s AND hidden = FALSE
-            LIMIT %s OFFSET %s
-        """, (current_search_gender, current_gender, session['user_id'], per_page, offset))
+        if current_app.config['DB_TYPE'] == 'postgres':
+            cur.execute("""
+                SELECT * FROM users
+                WHERE gender = %s AND search_gender = %s AND id != %s AND hidden = FALSE
+                LIMIT %s OFFSET %s
+            """, (current_search_gender, current_gender, session['user_id'], per_page, offset))
+        else:
+            cur.execute("""
+                SELECT * FROM users
+                WHERE gender = ? AND search_gender = ? AND id != ? AND hidden = FALSE
+                LIMIT ? OFFSET ?
+            """, (current_search_gender, current_gender, session['user_id'], per_page, offset))
         users = cur.fetchall()
 
-        # Получаем общее количество пользователей
-        cur.execute("""
-            SELECT COUNT(*) FROM users
-            WHERE gender = %s AND search_gender = %s AND id != %s AND hidden = FALSE
-        """, (current_search_gender, current_gender, session['user_id']))
+        if current_app.config['DB_TYPE'] == 'postgres':
+            cur.execute("""
+                SELECT COUNT(*) FROM users
+                WHERE gender = %s AND search_gender = %s AND id != %s AND hidden = FALSE
+            """, (current_search_gender, current_gender, session['user_id']))
+        else:
+            cur.execute("""
+                SELECT COUNT(*) FROM users
+                WHERE gender = ? AND search_gender = ? AND id != ? AND hidden = FALSE
+            """, (current_search_gender, current_gender, session['user_id']))
         total_users = cur.fetchone()['count']
         total_pages = (total_users + per_page - 1) // per_page
 
@@ -216,7 +244,6 @@ def search():
     finally:
         conn.close()
 
-# Выход
 @rgz.route('/logout')
 def logout():
     session.pop('user_id', None)
