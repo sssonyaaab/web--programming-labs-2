@@ -60,7 +60,7 @@ def register():
                 if current_app.config['DB_TYPE'] == 'postgres':
                     cur.execute("INSERT INTO users (login, password) VALUES (%s, %s);", (login, hashed_password))
                 else:
-                    cur.execute("INSERT INTO users (login, password) VALUES (?, ?);", (login, hashed_password))
+                    cur.execute("INSERT INTO users (login, password) VALUES (?, ?)", (login, hashed_password))
                 conn.commit()
                 conn.close()
                 return redirect(url_for('rgz.login'))
@@ -82,13 +82,13 @@ def login():
             if current_app.config['DB_TYPE'] == 'postgres':
                 cur.execute("SELECT * FROM users WHERE login = %s;", (login,))
             else:
-                cur.execute("SELECT * FROM users WHERE login = ?;", (login,))
+                cur.execute("SELECT * FROM users WHERE login = ?", (login,))
             user = cur.fetchone()
             conn.close()
 
             if user and check_password_hash(user['password'], password):
                 session['user_id'] = user['id']
-                return redirect(url_for('rgz.profile'))
+                return redirect(url_for('rgz.profile'), user=user)
             else:
                 message = "Неверный логин или пароль."
         except Exception as e:
@@ -128,14 +128,14 @@ def profile():
                 cur.execute("""
                     UPDATE users
                     SET name = ?, age = ?, gender = ?, search_gender = ?, about = ?, photo = ?
-                    WHERE id = ?;
+                    WHERE id = ?
                 """, (name, age, gender, search_gender, about, photo, session['user_id']))
             conn.commit()
 
             if current_app.config['DB_TYPE'] == 'postgres':
                 cur.execute("SELECT * FROM users WHERE id = %s;", (session['user_id'],))
             else:
-                cur.execute("SELECT * FROM users WHERE id = ?;", (session['user_id'],))
+                cur.execute("SELECT * FROM users WHERE id = ?", (session['user_id'],))
             user = cur.fetchone()
 
             message = "Профиль обновлен!"
@@ -159,7 +159,7 @@ def hide_profile():
         if current_app.config['DB_TYPE'] == 'postgres':
             cur.execute("UPDATE users SET hidden = TRUE WHERE id = %s;", (session['user_id'],))
         else:
-            cur.execute("UPDATE users SET hidden = TRUE WHERE id = ?;", (session['user_id'],))
+            cur.execute("UPDATE users SET hidden = TRUE WHERE id = ?", (session['user_id'],))
         conn.commit()
         message = "Ваш профиль скрыт."
     except Exception as e:
@@ -179,7 +179,7 @@ def delete_account():
         if current_app.config['DB_TYPE'] == 'postgres':
             cur.execute("DELETE FROM users WHERE id = %s;", (session['user_id'],))
         else:
-            cur.execute("DELETE FROM users WHERE id = ?;", (session['user_id'],))
+            cur.execute("DELETE FROM users WHERE id = ?", (session['user_id'],))
         conn.commit()
         conn.close()
         session.pop('user_id', None)
@@ -200,7 +200,7 @@ def search():
         if current_app.config['DB_TYPE'] == 'postgres':
             cur.execute("SELECT * FROM users WHERE id = %s;", (session['user_id'],))
         else:
-            cur.execute("SELECT * FROM users WHERE id = ?;", (session['user_id'],))
+            cur.execute("SELECT * FROM users WHERE id = ?", (session['user_id'],))
         current_user = cur.fetchone()
 
         current_gender = current_user['gender']
@@ -220,7 +220,7 @@ def search():
             cur.execute("""
                 SELECT * FROM users
                 WHERE gender = ? AND search_gender = ? AND id != ? AND hidden = FALSE
-                LIMIT ? OFFSET ?;
+                LIMIT ? OFFSET ?
             """, (current_search_gender, current_gender, session['user_id'], per_page, offset))
         users = cur.fetchall()
 
@@ -232,7 +232,7 @@ def search():
         else:
             cur.execute("""
                 SELECT COUNT(*) FROM users
-                WHERE gender = ? AND search_gender = ? AND id != ? AND hidden = FALSE;
+                WHERE gender = ? AND search_gender = ? AND id != ? AND hidden = FALSE
             """, (current_search_gender, current_gender, session['user_id']))
         total_users = cur.fetchone()['count']
         total_pages = (total_users + per_page - 1) // per_page
