@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block lab %} Лабораторная работа 8{% endblock %}
+
+{% block main %}
+    <h1>Мои статьи</h1>
+    
+    <a href="/lab8/articles/create" class="button">Создать статью</a>
+    
+    {% if articles %}
+        <ul>
+            {% for article in articles %}
+                <li>
+                    <h2>{{ article.title }}</h2>
+                    <p>{{ article.article_text }}</p>
+                    <a href="/lab8/articles/{{ article.id }}/edit" class="button">Редактировать</a>
+                    <form action="/lab8/articles/{{ article.id }}/delete" method="post" style="display:inline;">
+                        <button type="submit" class="button">Удалить</button>
+                    </form>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>У вас пока нет статей.</p>
+    {% endif %}
+{% endblock %}

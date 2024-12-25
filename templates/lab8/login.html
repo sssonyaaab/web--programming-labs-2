@@ -2,6 +2,24 @@
 
 {% block lab %} Лабораторная работа 8{% endblock %}
 
+{% block style %}
+<style>
+form {
+    display: inline-block;
+    text-align: left;
+    margin-top: 20px;
+}
+
+button {
+    padding: 10px 20px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+}   
+</style>
+{% endblock %}
+
+
 {% block main %}
     <h1>Вход в систему</h1>
     
@@ -19,6 +37,12 @@
         <div>
             <label>
                 Пароль: <input type="password" name="password">
+            </label>
+        </div>
+
+        <div>
+            <label>
+                Запомнить меня: <input type="checkbox" name="remember_">
             </label>
         </div>
 
