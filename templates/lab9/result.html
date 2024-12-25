@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block lab %} Лабораторная работа 9{% endblock %}
+
+{% block script %}
+<style>
+    body {
+        font-family: 'Arial', sans-serif;
+        background-image: url("/static/lab9/snow.avif");
+        background-size: cover;
+        color: #333;
+        text-align: center;
+    }
+        
+    h1 {
+        color: #d32f2f;
+        font-size: 2.5em;
+    }
+        
+    form {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        display: inline-block;
+        margin-top: 20px;
+    }
+        
+    button {
+        background-color: #d32f2f;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+        
+    button:hover {
+        background-color: #b71c1c;
+    }
+        
+    img {
+        max-width: 100%;
+        height: auto;
+        margin-top: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block main %}
+    <h1>Поздравление</h1>
+    <p>{{ greeting }}</p>
+    <p>{{ gift }}</p>
+    <img src="{{ url_for('static', filename=image) }}" alt="Подарок">
+{% endblock %}
