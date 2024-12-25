@@ -89,10 +89,15 @@ def login():
 
 
 @lab8.route('/lab8/articles/')
-@login_required
 def article_list():
-    user_articles = articles.query.filter_by(login_id=current_user.id).all()
-    return render_template('lab8/articles.html', articles=user_articles)
+    public_articles = articles.query.filter_by(is_public=True).all()
+
+    if current_user.is_authenticated:
+        user_articles = articles.query.filter_by(login_id=current_user.id).all()
+        all_articles = public_articles + user_articles
+    else:
+        all_articles = public_articles
+    return render_template('lab8/articles.html', articles=all_articles)
 
 
 @lab8.route('/lab8/articles/create', methods=['GET', 'POST'])
@@ -103,6 +108,8 @@ def create_article():
     
     title = request.form.get('title')
     article_text = request.form.get('article_text')
+    is_public = request.form.get('is_public') == 'on'
+    is_favorite = request.form.get('is_favorite') == 'on'
 
     if not title or not article_text:
         return render_template('lab8/create_article.html', error='Заполните все поля')
@@ -111,8 +118,8 @@ def create_article():
         login_id=current_user.id, 
         title=title, 
         article_text=article_text,
-        is_favorite=bool(False),
-        is_public=bool(True),
+        is_favorite=is_favorite,
+        is_public=is_public,
         likes=0
     )
     db.session.add(new_article)
@@ -133,12 +140,16 @@ def edit_article(article_id):
     
     title = request.form.get('title')
     article_text = request.form.get('article_text')
+    is_public = request.form.get('is_public') == 'on'
+    is_favorite = request.form.get('is_favorite') == 'on'
 
     if not title or not article_text:
         return render_template('lab8/edit_article.html', article=article, error='Заполните все поля')
 
     article.title = title
     article.article_text = article_text
+    article.is_public = is_public
+    article.is_favorite = is_favorite
     db.session.commit()
     return redirect('/lab8/articles/')
 
@@ -154,6 +165,30 @@ def delete_article(article_id):
     db.session.delete(article)
     db.session.commit()
     return redirect('/lab8/articles/')
+
+
+@lab8.route('/lab8/articles/search', methods=['GET'])
+def search_articles():
+    search_query = request.args.get('query', '')
+
+    if not search_query:
+        return redirect('/lab8/articles/')
+
+    search_results = articles.query.filter(
+        (articles.title.ilike(f'%{search_query}%')) |
+        (articles.article_text.ilike(f'%{search_query}%'))
+    ).all()
+
+    if current_user.is_authenticated:
+        user_articles = articles.query.filter(
+            (articles.login_id == current_user.id) &
+            ((articles.title.ilike(f'%{search_query}%')) | (articles.article_text.ilike(f'%{search_query}%')))
+        ).all()
+        all_articles = list(set(search_results + user_articles))
+    else:
+        all_articles = search_results
+
+    return render_template('lab8/articles.html', articles=all_articles, search_query=search_query)
 
 
 @lab8.route('/lab8/logout')
